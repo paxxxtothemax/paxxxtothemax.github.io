@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<script type="text/javascript" src="d3/d3.min.js"></script>
+		<link rel="stylesheet" href="style.css" type= "text/css">
+		<title>Traffic Trends in C5</title>
+		<h1 style="color: #ffffff;">TRAFFIC TRENDS IN C5</h1>
+		<p style="color: #51b64f;" id="daymenu">How is traffic along C5 on a <select></select></p>
+		<p style="color: #51b64f;" id="hourmenu"> at <select></select></p>
+		<p style="color: #51b64f;" id="boundmenu"><select></select> ?</p>
+
+	</head>
+
+<body>
+	
+	<script type="text/javascript">
+	//bgcolor="#E6E6FA"
+
+
+		var path;
+		var h;
+		var d;
+		var b;
+
+		function change()
+		{
+
+			d = daymenu.property("value");
+			h = hourmenu.property("value");
+			b = boundmenu.property("value");
+			path = "data/d" + d + "h" + h + ".csv";
+			redraw(path,b);
+			
+			
+		}
+
+		var days = [{"day": "Monday", "value": 1},
+					{"day": "Tuesday", "value": 2},
+					{"day": "Wednesday", "value": 3},
+					{"day": "Thursday", "value": 4},
+					{"day": "Friday", "value": 5},
+					{"day": "Saturday", "value": 6}];
+
+
+		var daymenu = d3.select("#daymenu select")
+						.on("change", change);
+						daymenu.selectAll("option")
+						.data(days)
+						.enter()
+						.append("option")
+							.text(function(d) {return d.day})
+								.attr("fill", "green")
+							.attr("value", function(d) {return d.value;});
+
+
+		var hours = [{"timeRange":"12:00-1:00am", "value": 0},
+					{"timeRange":"1:00-2:00am", "value": 1},
+					{"timeRange":"2:00-3:00am", "value": 2},
+					{"timeRange":"3:00-4:00am", "value": 3},
+					{"timeRange":"4:00-5:00am", "value": 4},
+					{"timeRange":"5:00-6:00am", "value": 5},
+					{"timeRange":"6:00-7:00am", "value": 6},
+					{"timeRange":"7:00-8:00am", "value": 7},
+					{"timeRange":"8:00-9:00am", "value": 8},
+					{"timeRange":"9:00-10:00am", "value": 9},
+					{"timeRange":"10:00-11:00am", "value": 10},
+					{"timeRange":"11:00-12:00nn", "value": 11},
+					{"timeRange":"12:00-1:00pm", "value": 12},
+					{"timeRange":"1:00-2:00pm", "value": 13},
+					{"timeRange":"2:00-3:00pm", "value": 14},
+					{"timeRange":"3:00-4:00pm", "value": 15},
+					{"timeRange":"4:00-5:00pm", "value": 16},
+					{"timeRange":"5:00-6:00pm", "value": 17},
+					{"timeRange":"6:00-7:00pm", "value": 18},
+					{"timeRange":"7:00-8:00pm", "value": 19},
+					{"timeRange":"8:00-9:00pm", "value": 20},
+					{"timeRange":"9:00-10:00pm", "value": 21},
+					{"timeRange":"10:00-11:00pm", "value": 22},
+					{"timeRange":"11:00-12:00mn", "value": 23}];
+
+		var hourmenu = d3.select("#hourmenu select")
+						.on("change", change);
+						hourmenu.selectAll("option")
+						.data(hours)
+						.enter()
+						.append("option")
+							.text(function(d) {return d.timeRange })
+							.attr("value", function(d) {return d.value;});
+
+						hourmenu.property("value",7);
+
+		var bounds = [{"bound":"Northbound", "value":1},
+					  {"bound":"Southbound", "value":2}];
+
+		var boundmenu = d3.select("#boundmenu select")
+						.on("change", change);
+						boundmenu.selectAll("option")
+						.data(bounds)
+						.enter()
+						.append("option")
+							.text(function(d) {return d.bound})
+							.attr("value", function(d) {return d.value;});
+
+		function drawS(data){
+
+			var numStations = 19; //19 stations
+			var bound = 2; //north and south
+
+			var width = 1275 // width of svg
+    			height = 500;//height of svg
+    			barPadding = 5;
+
+    		var barWidth = width / data.length;
+
+    		var xScale = d3.scale.ordinal()
+						.domain([0,d3.max(data,function(d) {return d[3]})])
+						.range([0, width], 0.05);
+
+			var yScale = d3.scale.ordinal()
+						.domain(0, height)
+						.range(height,0);
+					  	
+			var xAxis = d3.svg.axis()
+		    	.scale(xScale)
+		    	.orient("bottom");
+
+	    	var svg = d3.select("body")
+            		.append("svg")
+            		.attr("width", width)
+            		.attr("height", height);
+
+
+            var bar = svg.selectAll("g")
+      				.data(data)
+    				.enter().append("g")
+      				.attr("transform", function(d,i) { return "translate(" + i * barWidth + ",20)"; });
+      			svg.append("g")
+		    		.attr("class", "x axis")
+		    		.attr("transform", "translate(0," + height + ")")
+		    		.call(xAxis);
+
+
+            	bar.append("rect")
+				   	.attr("x", xScale)
+				  	.attr("y", yScale)
+				  	.attr("width", barWidth - barPadding)
+				  	.attr("height", height)
+				  	.filter(function(d) { return d.avgStatN <= 3 })
+        				.style("fill", "#eb1f2e")
+        			.filter(function(d) {return d.avgStatN <= 2.6})
+        				.style("fill", "#f06730")
+        			.filter(function(d) {return d.avgStatN <= 2.2})
+        				.style("fill", "#f7c531")
+        			.filter(function(d) {return d.avgStatN <= 1.8})
+        				.style("fill", "#86c149")
+        			.filter(function(d) {return d.avgStatN <= 1.4})
+        				.style("fill", "#51b64f");
+
+        			  
+					bar.append("text")
+      				.attr("x", barWidth/3)
+      				.attr("y", 10)
+                 	.attr("font-size", 20)
+                 	.attr("style", "fill: black; writing-mode: tb; glyph-orientation-vertical: 90")
+                 	.attr("font-family", "Courier New, monospace")
+                 	.text(function(d,i) { 
+      					if(i==0){return "TANDANG SORA"}
+      					else if(i==1){return "CAPTOL HILLS"}
+      					else if(i==2){return "UNIVERSITY OF THE PHILIPPINES"}
+      					else if(i==3){return "C.P. GARCIA"}
+      					else if(i==4){return "MIRIAM COLLEGE "}
+      					else if(i==5){return "ATENEO DE MANILA UNIVERSITY"}
+      					else if(i==6){return "XAVIERVILLE"}
+      					else if(i==7){return "AURORA BOULEVARD"}
+      					else if(i==8){return "P. TUAZON"}
+      					else if(i==9){return "BONNY SERRANO"}
+      					else if(i==10){return "LIBIS FLYOVER"}
+      					else if(i==11){return "EASTWOOD"}
+      					else if(i==12){return "GREEN MEADOWS"}
+      					else if(i==13){return "ORTIGAS AVENUE"}
+      					else if(i==14){return "J. VARGAS"}
+      					else if(i==15){return "LANUZA"}
+      					else if(i==16){return "BAGONG ILOG"}
+      					else if(i==17){return "KALAYAAN"}
+      					else if(i==18){return "MARKET! MARKET!"}
+      					});
+
+      				
+				
+		}
+
+		function drawN(data){
+
+			var numStations = 19; //19 stations
+			var bound = 2; //north and south
+
+			var width = 1275 // width of svg
+    			height = 500;//height of svg
+    			barPadding = 5;
+
+    		var barWidth = width / data.length;
+
+    		var xScale = d3.scale.ordinal()
+						.domain([0,d3.max(data,function(d) {return d[3]})])
+						.range([0, width], 0.05);
+
+			var yScale = d3.scale.ordinal()
+						.domain(0, height)
+						.range(height,0);
+					  	
+			var xAxis = d3.svg.axis()
+		    	.scale(xScale)
+		    	.orient("bottom");
+
+	    	var svg = d3.select("body")
+            		.append("svg")
+            		.attr("width", width)
+            		.attr("height", height);
+
+
+            var bar = svg.selectAll("g")
+      				.data(data)
+    				.enter().append("g")
+      				.attr("transform", function(d,i) { return "translate(" + i * barWidth + ",20)"; });
+      			svg.append("g")
+		    		.attr("class", "x axis")
+		    		.attr("transform", "translate(0," + height + ")")
+		    		.call(xAxis);
+
+
+            	bar.append("rect")
+				   	.attr("x", xScale)
+				  	.attr("y", yScale)
+				  	.attr("width", barWidth - barPadding)
+				  	.attr("height", height)
+				  	.filter(function(d) { return d.avgStatS <= 3 })
+        				.style("fill", "#eb1f2e")
+        			.filter(function(d) {return d.avgStatS <= 2.6})
+        				.style("fill", "#f06730")
+        			.filter(function(d) {return d.avgStatS <= 2.2})
+        				.style("fill", "#f7c531")
+        			.filter(function(d) {return d.avgStatS <= 1.8})
+        				.style("fill", "#86c149")
+        			.filter(function(d) {return d.avgStatS <= 1.4})
+        				.style("fill", "#51b64f");
+
+        			  
+					bar.append("text")
+      				.attr("x", barWidth/3)
+      				.attr("y", 10)
+                 	.attr("font-size", 20)
+                 	.attr("style", "fill: black; writing-mode: tb; glyph-orientation-vertical: 90")
+                 	.attr("font-family", "Courier New, monospace")
+                 	.text(function(d,i) { 
+      					if(i==0){return "TANDANG SORA"}
+      					else if(i==1){return "CAPTOL HILLS"}
+      					else if(i==2){return "UNIVERSITY OF THE PHILIPPINES"}
+      					else if(i==3){return "C.P. GARCIA"}
+      					else if(i==4){return "MIRIAM COLLEGE "}
+      					else if(i==5){return "ATENEO DE MANILA UNIVERSITY"}
+      					else if(i==6){return "XAVIERVILLE"}
+      					else if(i==7){return "AURORA BOULEVARD"}
+      					else if(i==8){return "P. TUAZON"}
+      					else if(i==9){return "BONNY SERRANO"}
+      					else if(i==10){return "LIBIS FLYOVER"}
+      					else if(i==11){return "EASTWOOD"}
+      					else if(i==12){return "GREEN MEADOWS"}
+      					else if(i==13){return "ORTIGAS AVENUE"}
+      					else if(i==14){return "J. VARGAS"}
+      					else if(i==15){return "LANUZA"}
+      					else if(i==16){return "BAGONG ILOG"}
+      					else if(i==17){return "KALAYAAN"}
+      					else if(i==18){return "MARKET! MARKET!"}
+      					});
+
+      				
+				
+		}
+
+		function redraw(path,b){
+
+			d3.select("svg")
+       			.remove();
+			this_path = path;
+			this_b = b;
+			
+
+			if (this_b==1)
+			{
+				d3.csv(this_path,drawS);
+			}
+			else
+			{
+				d3.csv(this_path,drawN);
+			}
+		}
+
+		
+
+		
+
+	</script>
+
+</body>
+</html>						

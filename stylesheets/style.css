@@ -1,0 +1,21 @@
+h1 {
+	background: #51b64f;
+	border-bottom: double 3px #aba;
+	border-left: solid 1px #9a9;
+	border-right: solid 1px #565;
+	border-top: solid 1px #9a9;
+	font-family: "Courier New", monospace;
+	letter-spacing: 0.2em;
+	margin: 0;
+	text-align: center;
+	padding: 15px 10px 15px 60px;
+	font-weight: 300;
+}
+
+p {
+    height:100%;
+    display:inline-block;
+    font-family: "Courier New", monospace;
+    font-size:20px;
+    font-weight: 300;
+}
